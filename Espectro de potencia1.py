@@ -6,7 +6,7 @@ Created on Tue Mar 31 23:49:34 2020
 """
 
 import numpy as np
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 from math import pi, sqrt, exp
 
 
@@ -15,6 +15,7 @@ Read data
 """
 #Select data directory
 directory = 'C:/Users/kiraz/Documents/McGill/Data/Espontanea-RD1/20191219/ND5LB/Data0130/Data0130.GUI'
+# directory = '/Users/vite/navigation_system/Rudo/156Th5.25'
 #create a pandas data frame with the information coming from the cluster_group file
 df = pd.read_csv(directory +"/cluster_group.tsv", sep="\t")
 #Select unique values from data frame
@@ -31,18 +32,20 @@ klusters= np.load (directory + "/spike_clusters.npy")
 data=np.stack([neuralData,klusters], axis=1)
 #make a data frame with the two arrays/se hace el data frame a partir del arreglo que unio las variables
 df=pd.DataFrame(data, columns=['spikes','klusters'])
-
-
 #Make a loop to load the data from all the neurons and save everything in a dataframe
-
-
 #select a template/elige la neurona de la posicion solicitada en neurons
-neuron =neurons[13]
+neuron =neurons[0]
 #find the values in the dataframe that corresponds to the template chosen/
 df['label'] = df['klusters']==neuron
 #Take just the True values corresponding to the template (neuron) chosen
 data =df[df['label']]['spikes']
 data = data/20
+
+"""
+Read neural data from clampfit
+"""
+directory = '/Users/vite/navigation_system/Data_Kei'
+data = np.loadtxt(directory + '/D11Data002.txt')
 
 #Convolution with Gaussian Kernel to transform data to continuous
 desirefreq=20 #Hz
@@ -54,18 +57,20 @@ def gauss(n=11,sigma=sigma):
     r = np.linspace(-int(n/2)+0.5,int(n/2)-0.5, n)
     return [1 / (sigma * sqrt(2*pi)) * exp(-float(x)*2/(2*sigma*2)) for x in r]
 #data=spikes[0].restrict(data).as_units('ms').index.values
-bins = np.linspace(data.min(),data.max(),(data.max()-data.min())/binsize)
+minv = int(data.min())
+maxv = int(data.max())
+bins = np.linspace( minv, maxv, int((maxv - minv)/binsize))
 hist, edges = np.histogram(
     data,
-    bins=bins,
+    bins= bins,
     density=False)
 kernel =  gauss()
 
 from scipy.signal import convolve
 signal=convolve(hist,kernel)
 
-figure()
-plot(signal)
+plt.figure()
+plt.plot(signal)
 
 signaldf=pd.DataFrame(signal)
 signaldf.to_csv (directory+'/signal_Data0130_13.csv')
