@@ -162,6 +162,6 @@ DSI_lista = []
 for c, n in enumerate(neurons):
     X = df_o[df_o['neuron']== "n" + str(n)]['X'].sum()
     Y = df_o[df_o['neuron']== "n" + str(n)]['Y'].sum()
-    DSI_lista.append(np.sqrt( abs(X)**2 + (abs(Y)**2)))
+    DSI_lista.append(np.sqrt( X**2 + Y**2))
     
 
