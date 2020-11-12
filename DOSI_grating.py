@@ -114,12 +114,10 @@ plt.savefig(directory + '/plots' + '/raster'  + '.jpg')
 
 
 
-"""
-DSI
-"""
 
-df_o = pd.DataFrame(columns = ['FR', 'neuron', 'orientation', 'X', 'Y'])
-# df_o["orientation"] = np.linspace(0, 2*np.pi, 9)[0:-1]
+
+df_base = pd.DataFrame(columns = ['FR', 'neuron', 'orientation'])
+# df_base["orientation"] = np.linspace(0, 2*np.pi, 9)[0:-1]
 c = 0
 orientations = np.linspace(0, 2*np.pi, 9)[0:-1]
 
@@ -131,38 +129,80 @@ for n in neurons:
         spk = spikesd[n].restrict(interval)
         #compute firing rate
         fr = len(spk)/interval.tot_length('s')
-        df_o.at[c,'FR'] = fr
-        df_o.at[c,'neuron'] = "n" + str(n)
+        df_base.at[c,'FR'] = fr
+        df_base.at[c,'neuron'] = "n" + str(n)
         c+=1
-    df_o.loc[df_o['neuron']== "n" + str(n), 'orientation']= orientations
+    df_base.loc[df_base['neuron']== "n" + str(n), 'orientation']= orientations
     
-df_o.orientation = df_o.orientation.astype(float)
-df_o.FR = df_o.FR.astype(float)
+df_base.orientation = df_base.orientation.astype(float)
+df_base.FR = df_base.FR.astype(float)
 
-
+#linear plot
 plt.figure()
-sns.lineplot(x = "orientation", y="FR", hue = "neuron", data=df_o)
+sns.lineplot(x = "orientation", y="FR", hue = "neuron", data=df_base)
 #polar plot
-plt.figure()
-g = sns.FacetGrid (df_o, col='neuron', hue = "neuron", subplot_kws=dict(projection='polar'), height=4.5,
+g = sns.FacetGrid (df_base, col='neuron', hue = "neuron", subplot_kws=dict(projection='polar'), height=4.5,
                   sharex=False, sharey=False, despine=False)
 g.map(sns.scatterplot, "orientation", "FR")
 g.map(plt.plot, "orientation", "FR")
 
+#polar plot just for one neuron
+n = 10
+neuron = "n" + str(n)
+df_n = df_base[df_base['neuron']== neuron]
+df_n.loc[8] = [df_base[df_base['neuron']== neuron]['FR'][0], neuron, 0]
+g = sns.FacetGrid (df_n, col='neuron', hue = "neuron", subplot_kws=dict(projection='polar'), height=4.5,
+                  sharex=False, sharey=False, despine=False)
+g.map(sns.scatterplot, "orientation", "FR")
+g.map(plt.plot, "orientation", "FR")
+
+
+"""
+DSI
+"""
+df_dsi = df_base
 #Calculate x and y coordinates
-df_o['X'] = df_o['FR']*np.cos(df_o['orientation'])
-df_o['Y'] = df_o['FR']*np.sin(df_o['orientation'])
+df_dsi['X'] = df_dsi['FR']*np.cos(df_dsi['orientation'])
+df_dsi['Y'] = df_dsi['FR']*np.sin(df_dsi['orientation'])
 #fix for x 
-df_o.loc[df_o['orientation'] ==orientations[4], 'X'] = 0
+df_dsi.loc[df_dsi['orientation'] ==orientations[4], 'X'] = 0
 #fix for y
-df_o.loc[df_o['orientation'] ==orientations[2], 'Y'] = 0
-df_o.loc[df_o['orientation'] ==orientations[6], 'Y'] = 0
+df_dsi.loc[df_dsi['orientation'] ==orientations[2], 'Y'] = 0
+df_dsi.loc[df_dsi['orientation'] ==orientations[6], 'Y'] = 0
 
 DSI_lista = []
 for c, n in enumerate(neurons):
-    X = df_o[df_o['neuron']== "n" + str(n)]['X'].sum()
-    Y = df_o[df_o['neuron']== "n" + str(n)]['Y'].sum()
+    X = df_dsi[df_dsi['neuron']== "n" + str(n)]['X'].sum()
+    Y = df_dsi[df_dsi['neuron']== "n" + str(n)]['Y'].sum()
 
-    Xa = df_o[df_o['neuron']== "n" + str(n)]['X'].abs().sum()
-    Ya = df_o[df_o['neuron']== "n" + str(n)]['Y'].abs().sum()
+    Xa = df_dsi[df_dsi['neuron']== "n" + str(n)]['X'].abs().sum()
+    Ya = df_dsi[df_dsi['neuron']== "n" + str(n)]['Y'].abs().sum()
     DSI_lista.append(np.sqrt( X**2 + Y**2)/np.sqrt( Xa**2 + Ya**2))
+
+    
+"""
+OSI
+"""
+axis = ['horizontal', 'ur-dl', 'vertical', 'ul-dr']
+df_ohsi = pd.DataFrame(columns = [ 'neuron', 'axis', 'FRt' ])
+
+c = 0
+for n in neurons:
+    for i in range(4):
+        df_ohsi.at[c,'neuron'] = "n" + str(n)
+        df_ohsi.at[c,'FRt'] = (df_base['FR'].iloc[c]+df_base['FR'].iloc[c+4])/2
+        c+=1
+    df_ohsi.loc[df_ohsi['neuron'] == 'n' + str(n), 'axis'] = axis
+
+OSI = []  
+for n in neurons:
+    horizontal = df_ohsi[df_ohsi['neuron']==  "n" + str(n) ][df_ohsi['axis']== 'horizontal']['FRt'].values
+    vertical = df_ohsi[df_ohsi['neuron']==  "n" + str(n) ][df_ohsi['axis']== 'vertical']['FRt'].values
+    ur_dl = df_ohsi[df_ohsi['neuron']==  "n" + str(n) ][df_ohsi['axis']== 'ur-dl']['FRt'].values 
+    ul_dr = df_ohsi[df_ohsi['neuron']==  "n" + str(n) ][df_ohsi['axis']== 'ul-dr']['FRt'].values
+    X = horizontal - vertical
+    Y = ur_dl - ul_dr
+    Xa = horizontal + vertical
+    Ya = ur_dl + ul_dr
+    # OSI.append(np.sqrt(( X**2 + Y**2)[0])/np.sqrt( (Xa**2 + Ya**2)[0]))
+    OSI.append(np.sqrt(( X**2 + Y**2)[0])/(Xa + Ya)[0])
