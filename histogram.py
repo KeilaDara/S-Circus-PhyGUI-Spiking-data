@@ -19,7 +19,7 @@ Read data
 """
 #Select data directory
 # directory = 'C:/Users/kiraz/Documents/McGill/Data/Stimulus-WT/20200722/data_WT_Grating8Dir_202007221537156Th5.25/data_WT_Grating8Dir_202007221537156.GUI'
-directory = '/Users/vite/navigation_system/Rudo/156Th5.25/'
+directory = 'C:/Users/kiraz/Documents/McGill/Data/Stimulus-WT/20200722/data_WT_Grating8Dir_202007221537156Th5.25/data_WT_Grating8Dir_202007221537156.GUI'
 #create a pandas data frame with the information coming from the cluster_group file
 df = pd.read_csv(directory +"/cluster_group.tsv",  sep="\t")
 #Select unique values from data frame
@@ -60,7 +60,7 @@ for i,j in enumerate(neurons):
 
 spikes_sel = np.asarray(spikes) #in ms
 
-n=6 #select neuron
+n=0 #select neuron
 binsize = 500 #in ms
 nbins = (spikes_sel[n][-1]-spikes_sel[n][0]) / binsize
 plt.figure()

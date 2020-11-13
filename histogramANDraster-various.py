@@ -19,7 +19,7 @@ Read data
 """
 #Select data directory
 # directory = 'C:/Users/kiraz/Documents/McGill/Data/Stimulus-WT/20200722/data_WT_Grating8Dir_202007221537156Th5.25/data_WT_Grating8Dir_202007221537156.GUI'
-directory = '/Users/vite/navigation_system/Rudo/156Th5.25/'
+directory = 'C:/Users/kiraz/Documents/McGill/Data/Stimulus-WT/20200722/EulerBaden/EB1527116CC1Th6/data_WT_EulerBadenStimulus_202007221527116.GUI'
 #create a pandas data frame with the information coming from the cluster_group file
 df = pd.read_csv(directory +"/cluster_group.tsv",  sep="\t")
 #Select unique values from data frame
@@ -61,15 +61,43 @@ for i,j in enumerate(neurons):
 
 spikes_sel = np.asarray(spikes) #in ms
 
-n=6 #select neuron
-binsize = 500 #in ms
+
+n=1 #select neuron
+binsize = 1000 #in ms
 nbins = (spikes_sel[n][-1]-spikes_sel[n][0]) / binsize
 linesize = 0.1
 
+
+file= directory + "/bin.txt"
+import pandas as pd
+df_stim=pd.read_csv(file, header=None)
+df_stim.columns=["bloque", "nombre", "tiempo", "u"] 
+df_stim["tiempo"]=df_stim["tiempo"]/20
+
 fig, (ax1,ax2) = plt.subplots(2, 1, sharex = True, figsize = [16,12])
+#left, bottom, width, height = (dcf_stim["tiempo"][2]/20, 0, 3000, 5)
+# fig, ax = plt.subplots()
+#shadow for white chirps to moving bar     
+for i in range(0, 26, 2):
+    left=df_stim["tiempo"][i]
+    height = len(spikes)
+    width=df_stim["tiempo"][i+1] - df_stim["tiempo"][i]
+    rect = plt.Rectangle((left, 0), width, height, facecolor="lightsalmon", alpha=0.1)
+    ax1.add_patch(rect)
+#shadow for white noise   
+left=df_stim["tiempo"][26]
+height = len(spikes)
+#last block of EB simulus + white noise duration in min*...
+width=df_stim["tiempo"][26]+ 4*60*1000
+rect = plt.Rectangle((left, 0), width, height, facecolor="lightblue", alpha=0.1)
+ax1.add_patch(rect)
+#ax.plot()
+
+
 ax1.eventplot(spikes_sel[n], linelengths = linesize, color='black')
 ax1.set_title('Neuron ' + str(n))
-ax2.hist(spikes_sel[n], bins = int(nbins), color = "tan")
+plt.box(False)
+ax2.hist(spikes_sel[n], bins = int(nbins), color = "sienna")
 ax2.set_xlabel("time (ms)")
 
 plt.box(False)

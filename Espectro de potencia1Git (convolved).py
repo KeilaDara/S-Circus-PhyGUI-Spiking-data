@@ -14,7 +14,7 @@ from math import pi, sqrt, exp
 Read data
 """
 #Select data directory
-directory = 'C:/Users/kiraz/Documents/McGill/Data/Espontanea-RD1/20191219/ND5LB/Data0130/Data0130.GUI'
+directory = 'C:/Users/kiraz/Documents/McGill/Data/Gnat-espontanea/0502020'
 # directory = '/Users/vite/navigation_system/Rudo/156Th5.25'
 #create a pandas data frame with the information coming from the cluster_group file
 df = pd.read_csv(directory +"/cluster_group.tsv", sep="\t")
@@ -44,7 +44,7 @@ data = data/20
 """
 Read neural data from clampfit
 """
-directory = '/Users/vite/navigation_system/Data_Kei'
+
 data = np.loadtxt(directory + '/D11Data002.txt')
 
 #Convolution with Gaussian Kernel to transform data to continuous
@@ -79,7 +79,7 @@ signaldf.to_csv (directory+'/signal_Data0130_13.csv')
 FFT
 """
 
-##Apply FFT to the continuous convolved data to obtain the power spectrum:
+##Apply FFT to the continuous convolved data to obtain the power spectrum:NO SIRVE
 import scipy.fftpack
 srate=1000/binsize #In Hz
 npnts=srate*2 #2s
