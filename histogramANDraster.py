@@ -54,6 +54,7 @@ for i,j in enumerate(neurons):
     df['label'] = df['klusters']==neuron
     #Take just the True values corresponding to the template (neuron) chosen
     data =df[df['label']]['spikes']
+    
     #Transform data to ms
     data = data/20
     spikes.append(data.values)
@@ -73,3 +74,17 @@ ax2.set_xlabel("time (ms)")
 
 plt.box(False)
 plt.show()
+
+# All at once!
+#Create bins
+bins = np.arange(begin, end)
+# get the spike count per bin
+for n in neurons:
+spike_count, _ = np.histogram(spk, bins)
+
+
+
+fig, (ax1,ax2) = plt.subplots(2, 1, sharex = True, figsize = [16,12])
+lista = ax1.eventplot(spikes_sel, linelengths = linesize, color='black')
+nbins = 20
+n, bins, patches = ax2.hist(spikes, bins=nbins)
