@@ -25,7 +25,7 @@ df = pd.read_excel(path, names = ["freq", "data", "neuron"], header = None)
 #seaborn vite modo
 f, ax = plt.subplots(figsize=(7, 7))
 ax.set(xscale="log")
-sns.lineplot(x = "freq", y = "data", ci = 10000, data = df, ax=ax)
+sns.lineplot(x = "freq", y = "data", ci =  'sd', data = df, ax=ax)
 
 
 #Rudo way
@@ -38,7 +38,7 @@ mean = df.groupby('freq').agg(np.mean)
 array1 = (mean-err)['data'].values.flatten()
 array2 = (mean+err)['data'].values.flatten()
 mean = mean.values.flatten()
-freqs = df[df['neuron']=='D125-9']['freq'].values.flatten()
+freqs = df[df['neuron']==df['neuron'][0]]['freq'].values.flatten()
 
 f, ax = plt.subplots(figsize=(7, 7))
 ax.set(xscale="log")
