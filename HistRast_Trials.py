@@ -16,7 +16,7 @@ import seaborn as sns
 
 directory = '/Users/vite/navigation_system/Rudo/20200722/'
 #get the number of trials
-trials = [*range(len(os.listdir(directory))/2)]
+trials = [*range( int(len(os.listdir(directory))/2)) ]
 
 trial1 = np.loadtxt(directory + '/Grating156-H8.txt')
 trial2 = np.loadtxt(directory + '/Grating345-H8.txt')
@@ -46,7 +46,7 @@ file5= directory + "/bin074.txt"
 #Read stimulus times
 files = [file1, file2, file3, file4, file5]
 
-trials= [1,2,3,4,5]
+# trials= [1,2,3,4,5]
 df_stimes = pd.DataFrame(index = [*range(32)], columns = range(len(trials)))
 for i in range(len(trials)):
     df_stim=pd.read_csv(files[i], header=None, usecols = [2])
@@ -73,6 +73,7 @@ for i in range(len(trials)):
     spk_counts.append(spike_count)
 spk_hist= np.sum(spk_counts, axis=0)
 
+
 fig, (ax1,ax2) = plt.subplots(2, 1, sharex = True, figsize = [16,12])
 
 begin = min([spikes_hist[i][0] for i in range(len(trials))])
@@ -89,7 +90,7 @@ for i in range(2,34,4):
     width=stims[i+1]- stims[i]
     rect = plt.Rectangle((left, 0), width, height, facecolor="lightsalmon", alpha=0.1)
     ax1.add_patch(rect)
-
+linesize = 0.1
 ax1.eventplot(spikes_hist, linelengths = linesize, color='black')
 ax1.set_title('Trials')
 plt.box(False)
