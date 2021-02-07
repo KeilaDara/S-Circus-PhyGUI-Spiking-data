@@ -14,7 +14,8 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-directory = '/Users/vite/navigation_system/Rudo/20200722/'
+directory = 'C:/Users/kiraz/Documents/McGill/Data/Stimulus-WT/SignalsDetectedClampfit/20200722'
+
 #get the number of trials
 trials = [*range( int(len(os.listdir(directory))/2)) ]
 
