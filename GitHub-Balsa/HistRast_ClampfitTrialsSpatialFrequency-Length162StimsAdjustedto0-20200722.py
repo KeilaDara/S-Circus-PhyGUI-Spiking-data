@@ -13,7 +13,8 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-directory = 'C:/Users/kiraz/Documents/McGill/Data/Stimulus-WT/SignalsDetectedClampfit/20200722'
+# directory = 'C:/Users/kiraz/Documents/McGill/Data/Stimulus-WT/SignalsDetectedClampfit/20200722'
+directory = '/Users/vite/navigation_system/Rudo/GitHub-Balsa'
 #get the number of trials
 # trials = [*range( int(len(os.listdir(directory))/2)) ]
 trials = [*range(3)]#cambiar dependiendo del numero de trials o señales a cargar
@@ -106,7 +107,7 @@ files = [file1, file2, file3]
 
 
 # trials= [1,2,3,4,5]
-
+#length of raws in the stimulation file
 numBlocks = 160#eran  162 (en c/ nuevo arch txt de stim) pero elimino prev la primera y ultima linea manualm
 
 df_stimes = pd.DataFrame(index = [*range(numBlocks)], columns = range(len(trials)))
@@ -147,17 +148,23 @@ for i in range(len(trials)):
     spk_counts.append(spike_count)
 spk_hist= np.sum(spk_counts, axis=0)
 
-#plot the raster
-fig, (ax1,ax2) = plt.subplots(2, 1, sharex = True, figsize = [16,12])
-begin = min([spikes_hist[i][0] for i in range(len(trials))])
-stims = []
+#Align the stimulation times to the spike times
+begin = min([spikes_hist[i][0] for i in range(len(trials))]) #time of the first spike
+#list with the stimulation times + the time of the first spike
+stims = [] 
 c = begin
 stims.append(c)
-array = df_stimes.diff().mean(axis=1).values[1::]
+#array with the mean times of the differences between starts and ends of events in df_stimes
+array = df_stimes.diff().mean(axis=1).values[1::] 
 for i in array:
     c+= i
     stims.append(c)
-stims = stims-stims[2]    
+stims = stims-stims[2] #rest the end time of the first wait interval
+path = directory + "/MeanStimTimes" + numNeur +'.npy'
+np.save(path, stims)
+
+#plot the raster
+fig, (ax1,ax2) = plt.subplots(2, 1, sharex = True, figsize = [16,12])
 stim_list = []
 colors =  ['darkslategray','cadetblue','dimgray','cadetblue','darkgray']
 for p,i in enumerate(range(2,len(stims),4)):
@@ -176,7 +183,6 @@ ax2.set_xlabel("time (min)")
 ax2.bar(bins[:-1], spk_hist, width = binsize, color = "sienna")
 plt.box(False)
 plt.show()
-
 #Calculate the peak for every stimulation block (every dir thorugh 5 SF)
 stim_list = np.asarray(stim_list)/1e6
 stim_list.round(out=stim_list)
@@ -188,5 +194,6 @@ for i in stim_list:
 plt.figure()
 plt.bar([*range(40)],fr_stim)
 plt.show()
+
 path = directory + "/spatialFreq" + numNeur
 np.save(path, np.asarray(fr_stim))
