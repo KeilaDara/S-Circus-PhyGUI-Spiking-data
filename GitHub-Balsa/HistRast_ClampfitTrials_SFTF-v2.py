@@ -25,58 +25,46 @@ def getspikes(directory, numNeur, recordingsList):
     for i in range(len(recordingsList)):
         spikesd[i] = nts.Ts(spikes[i])
     return spikesd
+
 def getStimTimes(directory, recordingsList):
     files = []
     for i in recordingsList:
         files.append(directory+'/bin'+i+'.txt')
     df_stims = pd.DataFrame(columns = [*range(len(files))])
     for i,file in enumerate (files): 
-        df_stim=pd.read_csv(file, header=None)
-        df_stim.columns=["bloque", "nombre", "tiempo", "u"] 
-        df_stim["tiempo"]=df_stim["tiempo"]/20
-        df_stims.loc[:,i] = df_stim['tiempo'].values
+        df_stim=pd.read_csv(file, header=None,usecols = [2])
+        df_stim.columns=["tiempo"] 
+        df_stims.loc[:,i] = (df_stim['tiempo']/0.02).values
          # df_stim['tiempo'].values
-    df_stimsMean = df_stims.mean(axis=1) 
-    return df_stimsMean
+    return df_stims
+
+def restrictSpk2stim (spikes, df_stimes):
+    spikes_hist = []
+    for i in range(df_stimes.columns.size):
+        startS = int(df_stimes.iloc[2,i])
+        endS = int(df_stimes.iloc[-1,i] + 1e6)
+        if spikes[i].index[0]>startS and spikes[i].index[-1]<endS:
+            spikes_hist.append(spikes[i].index.values - startS)
+        else:
+            interval = nts.IntervalSet(startS, endS)
+            t = spikes[i].restrict(interval).index.values - startS
+            spikes_hist.append(t)
+    return spikes_hist
 """
 Load Data
 """
 # directory = 'C:/Users/kiraz/Documents/McGill/Data/Stimulus-WT/SignalsDetectedClampfit/20200722'
 directory = '/Users/vite/navigation_system/Rudo/GitHub-Balsa'
 numNeur = '174C'
-recordingsList = ['06159','09212', '12282','15354'] #recordings just for numNeur
+recordingsList = ['06159','09212', ' 12282','15354'] #recordings just for numNeur
 # dictionary with the spikes corresponding to all the trials from one neuron
 spikes = getspikes(directory, numNeur, recordingsList) 
+
 #DataFrame with the times of the stimulation
-df_stimtimes = getStimTimes(directory, recordingsList)
+df_stims = getStimTimes(directory, recordingsList)
 
-#length of raws in the stimulation file
-numBlocks = 160#eran  162 (en c/ nuevo arch txt de stim) pero elimino prev la primera y ultima linea manualm
-
-df_stimes = pd.DataFrame(index = [*range(numBlocks)], columns = range(len(trials)))
-for i in range(len(trials)):
-    df_stim=pd.read_csv(files[i], header=None, usecols = [2])#files era i, pero un solo arch como ref, AQUI SE CORRIGIO PARA EVITAR PRIMERA Y ULTIMA FILA DE ARCHIVO DEL ESTIMULO
-    df_stimes.loc[:,i] = df_stim.values.flatten()/0.02#transform ttl timesteps a us
- 
 #restrict spike times to the stimulation time    
-spikes_hist = []
-for i in range(len(recordingsList)):
-    startS = int(df_stimes.iloc[2,i])
-    endS = int(df_stimes.iloc[-1,i] + 1e6)
-    if spikesd[i].index[0]>startS and spikesd[i].index[-1]<endS:
-        spikes_hist.append(spikesd[i].index.values - startS)
-    else:
-        interval = nts.IntervalSet(startS, endS)
-        t = spikesd[i].restrict(interval).index.values - startS
-        spikes_hist.append(t)
-
-# plt.figure()
-# plt.plot(spikesd[i].index, '.')
-# plt.axhline(y=low)
-# plt.axhline(y=up)
-# plt.show()
-
-
+spikes_hist = restrictSpk2stim (spikes, df_stimes)
 
 # All at once!
 #generate data for the histogram
@@ -86,24 +74,25 @@ binsize = 1e6 #in us
 bins = np.arange(begin, end+binsize, binsize)
 # get the spike count per bin
 spk_counts= []
-for i in range(len(trials)):
+for i in range(len(recordingsList)):
     spike_count, _ = np.histogram(spikes_hist[i], bins)
     spk_counts.append(spike_count)
-spk_hist= np.sum(spk_counts, axis=0)
+spk_hist = np.sum(spk_counts, axis=0)
 
-#Align the stimulation times to the spike times
-begin = min([spikes_hist[i][0] for i in range(len(trials))]) #time of the first spike
+#Align the stimulation times to the spike times 
+begin = min([spikes_hist[i][0] for i in range(len(recordingsList))]) #time of the first spike
 #list with the stimulation times + the time of the first spike
 stims = [] 
 c = begin
 stims.append(c)
+
 #array with the mean times of the differences between starts and ends of events in df_stimes
-array = df_stimes.diff().mean(axis=1).values[1::] 
+array = df_stims.diff().mean(axis=1).values[1::] 
 for i in array:
     c+= i
     stims.append(c)
 stims = stims-stims[2] #rest the end time of the first wait interval
-path = directory + "/MeanStimTimes" + numNeur +'.npy'
+path = directory + "/SFTF_MeanStimTimes" + numNeur +'.npy'
 np.save(path, stims)
 
 #plot the raster
@@ -113,7 +102,7 @@ colors =  ['darkslategray','cadetblue','dimgray','cadetblue','darkgray']
 for p,i in enumerate(range(2,len(stims),4)):
     left=stims[i]
     stim_list.append(int(left))
-    height = len(trials)
+    height = len(recordingsList)
     width=stims[i+1]- stims[i]
     rect = plt.Rectangle((left, 0), width, height, facecolor=colors[p//8], alpha=0.1)
     ax1.add_patch(rect)
@@ -135,8 +124,8 @@ for i in stim_list:
     val = np.max(spk_hist[i:i+5])
     fr_stim.append(val)   
 plt.figure()
-plt.bar([*range(40)],fr_stim)
+plt.bar([*range(len(fr_stim))],fr_stim)
 plt.show()
 
-path = directory + "/spatialFreq" + numNeur
+path = directory + "/SFTF_spatialFreq" + numNeur
 np.save(path, np.asarray(fr_stim))

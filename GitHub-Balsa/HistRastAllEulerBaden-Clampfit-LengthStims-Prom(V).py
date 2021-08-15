@@ -11,30 +11,13 @@ import numpy as np
 import os
 
 directory = 'C:/Users/kiraz/Documents/McGill/Data/Stimulus-WT/SignalsDetectedClampfit/20210706'
+
 spikes = []
-numNeur = '174L'
-recordingsList = ['01583','10516','19293','28179','35126','52593']
+numNeur = '174C'
+recordingsList = ['06159','09212', '12282','15354','59480']
 for num in recordingsList:
-    spiks = np.loadtxt(directory + '/Eu-Baden' + num + '-' +numNeur +'.txt')
+    spiks = np.loadtxt(directory + '/SFTN' + num + '-' +numNeur +'.txt')
     spikes.append(spiks)
-    
-
-
-
-# spikes1 = np.loadtxt(directory + '/Eu-Baden01583-174L.txt')
-# spikes2 = np.loadtxt(directory + '/Eu-Baden10516-174L.txt')
-# spikes3 = np.loadtxt(directory + '/Eu-Baden19293-174L.txt')
-# spikes4 = np.loadtxt(directory + '/Eu-Baden28179-174L.txt')
-# spikes5 = np.loadtxt(directory + '/Eu-Baden35126-174L.txt')
-# spikes6 = np.loadtxt(directory + '/Eu-Baden52593-174L.txt')
-
-
-# spikes1 = np.loadtxt(directory + '/Eu-Baden01583-235.txt')
-# spikes2 = np.loadtxt(directory + '/Eu-Baden10516-235.txt')
-# spikes3 = np.loadtxt(directory + '/Eu-Baden19293-235.txt')
-# spikes4 = np.loadtxt(directory + '/Eu-Baden28179-235.txt')
-# spikes5 = np.loadtxt(directory + '/Eu-Baden35126-235.txt')
-# spikes6 = np.loadtxt(directory + '/Eu-Baden52593-235.txt')
 
 
 spikes= np.asarray(spikes)
