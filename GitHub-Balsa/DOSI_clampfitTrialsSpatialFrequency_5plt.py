@@ -81,7 +81,7 @@ path_neuron = directory+'/SpatDataFrame' +numNeur + '.pkl'
 df_base = pd.read_pickle(path_neuron)
 path_stims = directory + "/MeanStimTimes" + numNeur +'.npy'
 stims =  np.load(path_stims) #in us
-pathxDOSI = directory + 'df_DOSI.pkl'
+pathxDOSI = directory + '/df_DOSI.pkl'
 df_DOSIs = pd.read_pickle(pathxDOSI)
 
 """
@@ -132,6 +132,8 @@ for l in df_base['label'].unique():
 #save results
 df_DOSIs.to_pickle(pathxDOSI)
 
+##############################################################################
+# Pandas way
 ### DSI
 #plot histograms by frequency
 for freq in df_base['label'].unique():
@@ -146,10 +148,41 @@ df_DOSIs.loc[:,['frequency','DSI']].hist(by='frequency',alpha=0.5)
 #plot histograms by frequency
 for freq in df_base['label'].unique():
     plt.figure()
-    df_DOSIs.loc[df_DOSIs['frequency']==freq]['OSI'].hist(alpha=0.5)
+    df_DOSIs.loc[df_DOSIs['frequency']==freq]['OSI'].hist(alpha=0.5, color='r')
     plt.xlabel = 'OSI'
     plt.ylabel='count'
     plt.show()
 #Plot for all
 df_DOSIs.loc[:,['frequency','OSI']].hist(by='frequency',alpha=0.5, color='r')
 
+##############################################################################
+# Seaborn way
+### DSI
+#plot histograms by frequency
+sns.set_theme(style="darkgrid")
+for freq in df_DOSIs['frequency'].unique():
+    plt.figure()
+    sns.histplot(df_DOSIs.loc[df_DOSIs['frequency']==freq]['DSI'], edgecolor=".3")
+    plt.title(freq)
+    plt.xlim(0,1)
+    plt.xlabel = 'DSI'
+    plt.ylabel='count'
+    plt.show()
+#Plot for all
+plt.figure()
+sns.histplot(data=df_DOSIs.loc[:,['frequency','DSI']], x="DSI",hue='frequency')
+plt.xlim(0,1)
+### OSI
+#plot histograms by frequency
+for freq in df_base['label'].unique():
+    plt.figure()
+    sns.histplot(df_DOSIs.loc[df_DOSIs['frequency']==freq]['OSI'], color='r', edgecolor=".3",)
+    plt.title(freq)
+    plt.xlim(0,1)
+    plt.xlabel = 'OSI'
+    plt.ylabel='count'
+    plt.show()
+#Plot for all
+plt.figure()
+sns.histplot(data=df_DOSIs.loc[:,['frequency','OSI']], x="OSI",hue='frequency')
+plt.xlim(0,1)
