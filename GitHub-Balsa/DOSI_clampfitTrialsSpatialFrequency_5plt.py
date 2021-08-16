@@ -132,5 +132,24 @@ for l in df_base['label'].unique():
 #save results
 df_DOSIs.to_pickle(pathxDOSI)
 
-
+### DSI
+#plot histograms by frequency
+for freq in df_base['label'].unique():
+    plt.figure()
+    df_DOSIs.loc[df_DOSIs['frequency']==freq]['DSI'].hist(alpha=0.5)
+    plt.xlabel = 'DSI'
+    plt.ylabel='count'
+    plt.show()
+#Plot for all
+df_DOSIs.loc[:,['frequency','DSI']].hist(by='frequency',alpha=0.5)
+### OSI
+#plot histograms by frequency
+for freq in df_base['label'].unique():
+    plt.figure()
+    df_DOSIs.loc[df_DOSIs['frequency']==freq]['OSI'].hist(alpha=0.5)
+    plt.xlabel = 'OSI'
+    plt.ylabel='count'
+    plt.show()
+#Plot for all
+df_DOSIs.loc[:,['frequency','OSI']].hist(by='frequency',alpha=0.5, color='r')
 
